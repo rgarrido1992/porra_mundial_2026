@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Porra Mundial 2026</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:       #080c10;
+      --surface:  #0e1318;
+      --border:   rgba(255,255,255,0.06);
+      --muted:    #3d4f61;
+    }
+
+    * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+    html, body { background: var(--bg); color: #e2e8f0; }
+
+    /* ── Tabla ─────────────────────────────────────────── */
+    .table-wrap {
+      overflow: auto;
+      max-height: 68vh;
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+    }
+    .grid-table {
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: 100%;
+    }
+
+    /* Cabecera sticky vertical */
+    .grid-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: #111820;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Columna partido sticky horizontal */
+    .c-match {
+      position: sticky;
+      left: 0;
+      z-index: 10;
+      background-color: var(--bg);
+      min-width: 160px;
+      width: 160px;
+    }
+    /* Columna resultado sticky horizontal */
+    .c-result {
+      position: sticky;
+      left: 160px;
+      z-index: 10;
+      background-color: var(--bg);
+      min-width: 68px;
+      width: 68px;
+    }
+    /* Intersección cabecera+columnas sticky: z más alto */
+    thead th.c-match  { z-index: 31; background: #111820; }
+    thead th.c-result { z-index: 30; background: #111820; }
+
+    /* ── Celdas de predicción ──────────────────────────── */
+    .cell-exact    { background: rgba(34, 197, 94,  0.10); }
+    .cell-tendency { background: rgba(234,179,  8,  0.09); }
+
+    /* ── Separador de fecha ────────────────────────────── */
+    .date-sep td {
+      background: #0b1017;
+      padding: 6px 12px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #4a6070;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Celdas de partido ─────────────────────────────── */
+    .match-inner {
+      padding: 8px 10px 6px;
+    }
+    .team-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      line-height: 1.2;
+    }
+    .team-bar {
+      width: 2px;
+      height: 16px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .team-flag {
+      width: 20px;
+      height: 14px;
+      object-fit: cover;
+      border-radius: 2px;
+      flex-shrink: 0;
+      display: block;
+    }
+    .team-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.88);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 108px;
+    }
+    .match-meta {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 5px;
+    }
+    .match-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: #3d5060;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 3px;
+      padding: 1px 4px;
+      letter-spacing: .04em;
+    }
+    .match-time {
+      font-size: 10px;
+      color: #3d5060;
+    }
+
+    /* ── Scrollbar ─────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #1e2d3d; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #2d4055; }
+
+    .mono { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <!-- ═══ CABECERA ═══════════════════════════════════════════════ -->
+  <header style="background:#0b0f14; border-bottom: 1px solid var(--border);">
+    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg flex items-center justify-center text-lg shrink-0"
+             style="background:linear-gradient(135deg,#16a34a,#15803d);">⚽</div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold tracking-tight text-white leading-tight">
+            Porra Mundial 2026
+          </h1>
+          <p class="text-xs text-slate-500">Fase de Grupos</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 text-xs text-slate-500 shrink-0">
+        <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+        <span><%= playedMatches %>/<%= totalMatches %> jugados</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-screen-2xl mx-auto px-4 sm:px-6 py-5">
+
+    <!-- ═══ RANKING ════════════════════════════════════════════════ -->
+    <section class="mb-6">
+      <p class="text-[10px] font-bold uppercase tracking-[.12em] text-slate-600 mb-2">Clasificación</p>
+
+      <div style="background:#0e1318; border:1px solid var(--border); border-radius:0.75rem; overflow:hidden;">
+
+        <!-- Cabecera -->
+        <div class="grid text-[10px] font-semibold uppercase tracking-wider text-slate-600 px-3 py-2"
+             style="grid-template-columns:28px 1fr 44px 80px 36px; border-bottom:1px solid var(--border); background:#111820;">
+          <span class="text-center">#</span>
+          <span>Nombre</span>
+          <span class="text-right">Pts</span>
+          <span class="text-center">✓ · ≈ · ✗</span>
+          <span class="text-right">%</span>
+        </div>
+
+        <% participantScores.forEach((p, i) => {
+          const pct = p.playedCount > 0
+            ? Math.round((p.exactCount*3 + p.tendencyCount) / (p.playedCount*3) * 100) : 0;
+          const posColor = p.position===1 ? '#f59e0b'
+                         : p.position===2 ? '#94a3b8'
+                         : p.position===3 ? '#b45309' : '#3d4f61';
+          const rowBg = p.position===1 ? 'background:rgba(245,158,11,0.04);'
+                      : p.position===2 ? 'background:rgba(148,163,184,0.03);'
+                      : p.position===3 ? 'background:rgba(180,83,9,0.03);' : '';
+        %>
+          <div class="grid items-center px-3 py-2 hover:bg-white/[.015] transition-colors"
+               style="grid-template-columns:28px 1fr 44px 80px 36px; <%= rowBg %>
+                      border-top:<%= i===0 ? 'none' : '1px solid rgba(255,255,255,0.04)' %>;">
+
+            <!-- Posición -->
+            <span class="mono text-xs font-bold text-center" style="color:<%= posColor %>;">
+              <%= p.position %>
+            </span>
+
+            <!-- Nombre -->
+            <span class="text-sm font-semibold text-white truncate pr-2"><%= p.name %></span>
+
+            <!-- Puntos -->
+            <span class="mono font-black text-right" style="font-size:15px; color:<%= posColor %>;">
+              <%= p.totalPoints %>
+            </span>
+
+            <!-- ✓ ≈ ✗ -->
+            <div class="flex items-center justify-center gap-2 text-[11px] mono">
+              <span class="text-green-400"><%= p.exactCount %></span>
+              <span style="color:var(--muted);">·</span>
+              <span class="text-yellow-400"><%= p.tendencyCount %></span>
+              <span style="color:var(--muted);">·</span>
+              <span class="text-slate-600"><%= p.zeroCount %></span>
+            </div>
+
+            <!-- % -->
+            <span class="mono text-[11px] text-right text-slate-500"><%= pct %>%</span>
+
+          </div>
+        <% }); %>
+
+      </div>
+    </section>
+
+    <!-- ═══ LEYENDA ═════════════════════════════════════════════════ -->
+    <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 mb-3 text-[10px] text-slate-600">
+      <span class="flex items-center gap-1.5">
+        <span class="w-2.5 h-2.5 rounded-sm" style="background:rgba(34,197,94,.18);border:1px solid rgba(34,197,94,.3);"></span>
+        3 pts — Marcador exacto
+      </span>
+      <span class="flex items-center gap-1.5">
+        <span class="w-2.5 h-2.5 rounded-sm" style="background:rgba(234,179,8,.15);border:1px solid rgba(234,179,8,.3);"></span>
+        1 pt — Tendencia acertada
+      </span>
+      <span class="flex items-center gap-1.5">
+        <span class="w-2.5 h-2.5 rounded-sm" style="background:transparent;border:1px solid var(--border);"></span>
+        0 pts / Por jugar
+      </span>
+    </div>
+
+    <!-- ═══ TABLA ════════════════════════════════════════════════════ -->
+    <section>
+      <div class="flex items-center justify-between mb-2.5">
+        <p class="text-[10px] font-bold uppercase tracking-[.12em] text-slate-600">
+          Matriz de Predicciones
+        </p>
+        <span class="text-[10px] text-slate-700">
+          <%= totalMatches %> partidos · <%= participantScores.length %> participantes
+        </span>
+      </div>
+
+      <div class="table-wrap">
+        <table class="grid-table text-xs">
+
+          <!-- CABECERA ── sticky top ────────────────────── -->
+          <thead>
+            <tr>
+              <th class="c-match text-left px-2.5 py-2.5 text-slate-500 font-semibold tracking-wide border-r"
+                  style="border-color:var(--border);">
+                Partido
+              </th>
+              <th class="c-result text-center px-2 py-2.5 text-slate-500 font-semibold border-r"
+                  style="border-color:var(--border);">
+                Real
+              </th>
+              <% participantScores.forEach(p => { %>
+                <th class="text-center px-3 py-2 text-slate-300 font-semibold whitespace-nowrap"
+                    style="min-width:78px;">
+                  <div><%= p.name %></div>
+                  <div class="text-slate-600 font-normal text-[10px] mono mt-0.5"><%= p.totalPoints %> pts</div>
+                </th>
+              <% }); %>
+            </tr>
+          </thead>
+
+          <!-- CUERPO ─────────────────────────────────────── -->
+          <tbody>
+            <%
+              let currentDateKey = null;
+              matchData.forEach(match => {
+                const h = match.homeTeamData;
+                const a = match.awayTeamData;
+                const hasResult = match.homeScore !== null;
+                // Gradiente top→bottom: color local arriba, color visitante abajo
+                const grad = `linear-gradient(to bottom, rgba(${h.rgb},0.22) 0%, transparent 45%, transparent 55%, rgba(${a.rgb},0.22) 100%)`;
+            %>
+
+              <!-- Separador de fecha -->
+              <% if (match.dateKey !== currentDateKey) { currentDateKey = match.dateKey; %>
+                <tr class="date-sep">
+                  <td colspan="<%= participantScores.length + 2 %>">
+                    <%= match.dateKey.charAt(0).toUpperCase() + match.dateKey.slice(1) %>
+                  </td>
+                </tr>
+              <% } %>
+
+              <!-- Fila del partido -->
+              <tr style="border-top:1px solid rgba(255,255,255,0.025);"
+                  class="hover:bg-white/[.015] transition-colors">
+
+                <!-- Celda de partido: gradiente + banderas + barras de color -->
+                <td class="c-match border-r" style="border-color:var(--border);
+                    background-image:<%= grad %>;">
+                  <div class="match-inner">
+
+                    <!-- Equipo local -->
+                    <div class="team-row mb-1">
+                      <div class="team-bar" style="background:rgba(<%= h.rgb %>,0.75);"></div>
+                      <img class="team-flag"
+                           src="https://flagcdn.com/w40/<%= h.code %>.png"
+                           alt="<%= match.homeTeam %>"
+                           loading="lazy">
+                      <span class="team-name"><%= match.homeTeam %></span>
+                    </div>
+
+                    <!-- Equipo visitante -->
+                    <div class="team-row">
+                      <div class="team-bar" style="background:rgba(<%= a.rgb %>,0.75);"></div>
+                      <img class="team-flag"
+                           src="https://flagcdn.com/w40/<%= a.code %>.png"
+                           alt="<%= match.awayTeam %>"
+                           loading="lazy">
+                      <span class="team-name"><%= match.awayTeam %></span>
+                    </div>
+
+                    <!-- Nº partido + hora -->
+                    <div class="match-meta">
+                      <span class="match-num">#<%= match.matchNumber %></span>
+                      <span class="match-time"><%= match.timeStr %> h</span>
+                    </div>
+
+                  </div>
+                </td>
+
+                <!-- Resultado real -->
+                <td class="c-result text-center px-2 py-3 border-r"
+                    style="border-color:var(--border);">
+                  <% if (hasResult) { %>
+                    <span class="mono font-semibold text-white text-sm tracking-wider">
+                      <%= match.homeScore %>–<%= match.awayScore %>
+                    </span>
+                  <% } else { %>
+                    <span style="color:var(--muted);">–</span>
+                  <% } %>
+                </td>
+
+                <!-- Predicciones por participante -->
+                <% participantScores.forEach(p => {
+                  const pred = match.predictionsMap[p.id];
+                  let cellClass = '', scoreColor = 'color:#3d5060;', ptsStr = '';
+
+                  if (pred && hasResult) {
+                    if      (pred.points === 3) { cellClass='cell-exact';    scoreColor='color:#4ade80;'; ptsStr='+3'; }
+                    else if (pred.points === 1) { cellClass='cell-tendency'; scoreColor='color:#fbbf24;'; ptsStr='+1'; }
+                    else                        { cellClass='';              scoreColor='color:#3d5060;'; ptsStr='0';  }
+                  } else if (pred && !hasResult) {
+                    scoreColor = 'color:rgba(255,255,255,0.5);';
+                  }
+                %>
+                  <td class="px-2 py-3 text-center <%= cellClass %>" style="border-left:1px solid rgba(255,255,255,0.025);">
+                    <% if (pred) { %>
+                      <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+                        <span class="mono font-semibold text-xs" style="<%= scoreColor %>">
+                          <%= pred.homeScore %>–<%= pred.awayScore %>
+                        </span>
+                        <% if (hasResult) { %>
+                          <span class="mono text-[9px]" style="<%= scoreColor %>;opacity:.6;"><%= ptsStr %></span>
+                        <% } %>
+                      </div>
+                    <% } else { %>
+                      <span style="color:#1e2d3d;">—</span>
+                    <% } %>
+                  </td>
+                <% }); %>
+
+              </tr>
+
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <footer style="border-top:1px solid var(--border);" class="mt-10 py-3 px-6 text-center text-[10px]" style="color:var(--muted);">
+    Porra Mundial 2026 &middot; Fase 1
+  </footer>
+
+</body>
+</html>

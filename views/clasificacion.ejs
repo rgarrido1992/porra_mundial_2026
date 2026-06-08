@@ -1,0 +1,81 @@
+<%- include('partials/_nav', {
+  pageTitle:    'Clasificación',
+  activePage:   'clasificacion',
+  playedMatches, totalMatches,
+  extraCss: `
+    .rank-row { border-top:1px solid rgba(255,255,255,0.04); transition:background .1s; }
+    .rank-row:hover { background:rgba(255,255,255,0.018); }
+    .bar { height:3px; border-radius:2px; background:linear-gradient(90deg,#16a34a,#15803d); }
+  `
+}) %>
+
+<main class="max-w-lg mx-auto px-4 py-6">
+
+  <p class="text-[10px] font-bold uppercase tracking-[.12em] text-slate-600 mb-3">Fase de Grupos</p>
+
+  <div style="background:var(--surface); border:1px solid var(--border); border-radius:0.75rem; overflow:hidden;">
+
+    <!-- Cabecera de columnas -->
+    <div class="grid items-center px-4 py-2 text-[10px] font-semibold uppercase tracking-wider text-slate-600"
+         style="grid-template-columns:28px 1fr 40px 72px 34px; background:#111820; border-bottom:1px solid var(--border);">
+      <span class="text-center">#</span>
+      <span>Jugador</span>
+      <span class="text-right">Pts</span>
+      <span class="text-center">✓ · ≈ · ✗</span>
+      <span class="text-right">%</span>
+    </div>
+
+    <%
+      participantScores.forEach((p, i) => {
+        const pct = p.playedCount > 0
+          ? Math.round((p.exactCount * 3 + p.tendencyCount) / (p.playedCount * 3) * 100) : 0;
+        const posColor = p.position===1 ? '#f59e0b'
+                       : p.position===2 ? '#94a3b8'
+                       : p.position===3 ? '#b45309' : '#3d4f61';
+        const rowBg = p.position===1 ? 'rgba(245,158,11,0.05)'
+                    : p.position===2 ? 'rgba(148,163,184,0.03)'
+                    : p.position===3 ? 'rgba(180,83,9,0.03)' : 'transparent';
+    %>
+      <div class="rank-row grid items-center px-4 py-2.5"
+           style="grid-template-columns:28px 1fr 40px 72px 34px; background:<%= rowBg %>;">
+
+        <span class="mono text-xs font-bold text-center" style="color:<%= posColor %>;">
+          <%= p.position %>
+        </span>
+
+        <div class="pr-2 min-w-0">
+          <div class="text-sm font-semibold text-white truncate"><%= p.name %></div>
+          <% if (p.playedCount > 0) { %>
+            <div class="mt-1" style="background:rgba(255,255,255,0.06); border-radius:2px; height:3px;">
+              <div class="bar" style="width:<%= pct %>%;"></div>
+            </div>
+          <% } %>
+        </div>
+
+        <span class="mono font-black text-right" style="font-size:16px; color:<%= posColor %>;">
+          <%= p.totalPoints %>
+        </span>
+
+        <div class="flex items-center justify-center gap-1.5 text-[11px] mono">
+          <span class="text-green-400"><%= p.exactCount %></span>
+          <span class="text-slate-700">·</span>
+          <span class="text-yellow-400"><%= p.tendencyCount %></span>
+          <span class="text-slate-700">·</span>
+          <span class="text-slate-600"><%= p.zeroCount %></span>
+        </div>
+
+        <span class="mono text-[11px] text-right" style="color:var(--muted);"><%= pct %>%</span>
+
+      </div>
+    <% }); %>
+
+  </div>
+
+  <p class="text-center text-[11px] mt-4" style="color:var(--muted);">
+    <%= playedMatches %> de <%= totalMatches %> partidos disputados
+  </p>
+
+</main>
+
+</body>
+</html>

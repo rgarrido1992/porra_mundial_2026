@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pronósticos — <%= participant.name %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+    html, body { background: #080c10; color: #e2e8f0; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    input[type="number"] {
+      background: #0b0f14;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #e2e8f0;
+      border-radius: 6px;
+      padding: 4px 8px;
+      width: 52px;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+    }
+    input[type="number"]:focus { outline: none; border-color: rgba(34,197,94,0.5); }
+    .section { background: #0e1318; border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; }
+    .row-match { border-top: 1px solid rgba(255,255,255,0.04); }
+    .row-match:hover { background: rgba(255,255,255,0.015); }
+    .has-pred { background: rgba(99,102,241,0.04); }
+    .btn-primary {
+      background: linear-gradient(135deg,#16a34a,#15803d);
+      border: none;
+      color: white;
+      padding: 10px 28px;
+      font-size: 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .btn-primary:hover { opacity: .9; }
+    .btn-danger {
+      background: #1a0a0a;
+      border: 1px solid rgba(239,68,68,0.2);
+      color: #f87171;
+      padding: 4px 10px;
+      font-size: 11px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: #1e2d3d; border-radius: 3px; }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    input[type=number] { -moz-appearance: textfield; }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <!-- CABECERA -->
+  <header style="background:#0b0f14; border-bottom:1px solid rgba(255,255,255,0.06);">
+    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="/admin" class="text-slate-500 hover:text-slate-300 text-lg leading-none">←</a>
+        <div>
+          <h1 class="text-sm font-bold text-white leading-tight">
+            Pronósticos — <%= participant.name %>
+          </h1>
+          <p class="text-[10px] text-slate-500">Deja vacíos los campos para borrar un pronóstico</p>
+        </div>
+      </div>
+      <form method="POST" action="/admin/logout" style="margin:0;">
+        <button type="submit" class="btn-danger">Cerrar sesión</button>
+      </form>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-4 py-6">
+
+    <% if (saved) { %>
+      <div class="rounded-lg px-4 py-2.5 text-sm text-green-400 flex items-center gap-2 mb-5"
+           style="background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.2);">
+        ✓ Pronósticos guardados correctamente
+      </div>
+    <% } %>
+
+    <form method="POST" action="/admin/participant/<%= participant.id %>/predictions">
+
+      <div class="section overflow-hidden mb-5">
+        <%
+          let lastGroup = null;
+          matches.forEach(match => {
+            const pred = predMap[match.id];
+            const hasPred = !!pred;
+        %>
+
+          <% if (match.group !== lastGroup) { lastGroup = match.group; %>
+            <div class="px-5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-600"
+                 style="background:#0a0d11; border-top:1px solid rgba(255,255,255,0.04);">
+              Grupo <%= match.group %>
+            </div>
+          <% } %>
+
+          <div class="row-match <%= hasPred ? 'has-pred' : '' %> px-5 py-2">
+            <div class="flex items-center gap-3 flex-wrap">
+
+              <span class="mono text-[10px] text-slate-600 w-8 shrink-0">#<%= match.matchNumber %></span>
+
+              <div class="flex items-center gap-2 flex-1 min-w-0">
+                <span class="text-sm text-slate-300 truncate text-right" style="min-width:110px;max-width:150px;">
+                  <%= match.homeTeam %>
+                </span>
+                <input type="number" name="home_<%= match.id %>" min="0" max="99"
+                       value="<%= hasPred ? pred.homeScore : '' %>"
+                       placeholder="–">
+                <span class="text-slate-600 font-bold mono">–</span>
+                <input type="number" name="away_<%= match.id %>" min="0" max="99"
+                       value="<%= hasPred ? pred.awayScore : '' %>"
+                       placeholder="–">
+                <span class="text-sm text-slate-300 truncate" style="min-width:110px;max-width:150px;">
+                  <%= match.awayTeam %>
+                </span>
+              </div>
+
+              <% if (hasPred) { %>
+                <span class="mono text-[10px] text-indigo-400 shrink-0">✓</span>
+              <% } else { %>
+                <span class="mono text-[10px] text-slate-700 shrink-0">—</span>
+              <% } %>
+
+            </div>
+          </div>
+
+        <% }); %>
+      </div>
+
+      <div class="flex justify-end">
+        <button type="submit" class="btn-primary">Guardar todos los pronósticos</button>
+      </div>
+    </form>
+  </main>
+</body>
+</html>

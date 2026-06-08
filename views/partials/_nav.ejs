@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title><%= pageTitle %> — Porra Mundial 2026</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg:#080c10; --surface:#0e1318; --border:rgba(255,255,255,0.06); --muted:#3d4f61; }
+    * { font-family:'Inter',sans-serif; box-sizing:border-box; }
+    html,body { background:var(--bg); color:#e2e8f0; }
+    .mono { font-family:'JetBrains Mono',monospace; }
+    ::-webkit-scrollbar { width:5px; height:5px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:#1e2d3d; border-radius:3px; }
+    <%- extraCss || '' %>
+  </style>
+</head>
+<body class="min-h-screen">
+
+<!-- ══ CABECERA + NAVEGACIÓN ════════════════════════════════════════════════ -->
+<header style="background:#0b0f14; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:50;">
+  <div class="max-w-screen-2xl mx-auto px-4 sm:px-6">
+
+    <!-- Fila superior: logo + contador -->
+    <div class="flex items-center justify-between py-3">
+      <div class="flex items-center gap-2.5">
+        <img src="https://digitalhub.fifa.com/transform/7189acb1-8453-4a14-8248-70ab7a76f372/FWC-26-Logo-for-Countdown?&io=transform:fill&quality=75"
+             alt="FIFA World Cup 2026" class="h-8 w-auto shrink-0" style="object-fit:contain;">
+        <span class="text-sm font-bold text-white tracking-widest uppercase hidden sm:block">Porra World Cup 2026</span>
+        <span class="text-sm font-bold text-white tracking-widest uppercase sm:hidden">Porra WC 2026</span>
+      </div>
+      <div class="flex items-center gap-1.5 text-xs text-slate-500">
+        <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+        <span class="mono"><%= playedMatches %>/<%= totalMatches %></span>
+        <span class="hidden sm:inline">jugados</span>
+      </div>
+    </div>
+
+    <!-- Fila de tabs -->
+    <div class="flex items-center gap-0 -mb-px overflow-x-auto">
+      <a href="/fase-grupos"
+         class="px-4 py-2.5 text-xs font-semibold whitespace-nowrap border-b-2 transition-colors <%= activePage==='fase-grupos' ? 'border-green-500 text-white' : 'border-transparent text-slate-500 hover:text-slate-300' %>">
+        Fase de Grupos
+      </a>
+      <a href="/clasificacion"
+         class="px-4 py-2.5 text-xs font-semibold whitespace-nowrap border-b-2 transition-colors <%= activePage==='clasificacion' ? 'border-green-500 text-white' : 'border-transparent text-slate-500 hover:text-slate-300' %>">
+        Clasificación
+      </a>
+      <!-- Futuras fases: añadir aquí -->
+    </div>
+
+  </div>
+</header>

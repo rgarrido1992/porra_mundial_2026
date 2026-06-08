@@ -1,0 +1,151 @@
+<%- include('partials/_nav', {
+  pageTitle:    'Fase de Grupos',
+  activePage:   'fase-grupos',
+  playedMatches, totalMatches,
+  extraCss: `
+    .table-wrap { overflow:auto; max-height:calc(100vh - 120px); border:1px solid var(--border); border-radius:0.75rem; }
+    .grid-table { border-collapse:separate; border-spacing:0; min-width:100%; }
+    .grid-table thead th { position:sticky; top:0; z-index:20; background:#111820; border-bottom:1px solid var(--border); }
+    .c-match  { position:sticky; left:0; z-index:10; background-color:var(--bg); min-width:160px; width:160px; }
+    .c-result { position:sticky; left:160px; z-index:10; background-color:var(--bg); min-width:68px; width:68px; }
+    thead th.c-match  { z-index:31; background:#111820; }
+    thead th.c-result { z-index:30; background:#111820; }
+    .cell-exact    { background:rgba(34,197,94,.10); }
+    .cell-tendency { background:rgba(234,179,8,.09); }
+    .date-sep td { background:#0b1017; padding:6px 12px; font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#4a6070; border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+    .match-inner { padding:8px 10px 6px; }
+    .team-row { display:flex; align-items:center; gap:6px; line-height:1.2; }
+    .team-bar { width:2px; height:16px; border-radius:2px; flex-shrink:0; }
+    .team-flag { width:20px; height:14px; object-fit:cover; border-radius:2px; flex-shrink:0; display:block; }
+    .team-name { font-size:11px; font-weight:600; color:rgba(255,255,255,0.88); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:108px; }
+    .match-meta { display:flex; align-items:center; gap:5px; margin-top:5px; }
+    .match-num { font-family:'JetBrains Mono',monospace; font-size:9px; color:#3d5060; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); border-radius:3px; padding:1px 4px; letter-spacing:.04em; }
+    .match-time { font-size:10px; color:#3d5060; }
+  `
+}) %>
+
+<main class="max-w-screen-2xl mx-auto px-4 sm:px-6 py-5">
+
+  <!-- Leyenda -->
+  <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 mb-3 text-[10px] text-slate-600">
+    <span class="flex items-center gap-1.5">
+      <span class="w-2.5 h-2.5 rounded-sm" style="background:rgba(34,197,94,.18);border:1px solid rgba(34,197,94,.3);"></span>
+      3 pts — Marcador exacto
+    </span>
+    <span class="flex items-center gap-1.5">
+      <span class="w-2.5 h-2.5 rounded-sm" style="background:rgba(234,179,8,.15);border:1px solid rgba(234,179,8,.3);"></span>
+      1 pt — Tendencia acertada
+    </span>
+    <span class="flex items-center gap-1.5">
+      <span class="w-2.5 h-2.5 rounded-sm" style="background:transparent;border:1px solid var(--border);"></span>
+      0 pts / Por jugar
+    </span>
+  </div>
+
+  <!-- Tabla -->
+  <div class="flex items-center justify-between mb-2">
+    <p class="text-[10px] font-bold uppercase tracking-[.12em] text-slate-600">Matriz de Predicciones</p>
+    <span class="text-[10px] text-slate-700"><%= totalMatches %> partidos · <%= participantScores.length %> participantes</span>
+  </div>
+
+  <div class="table-wrap">
+    <table class="grid-table text-xs">
+
+      <thead>
+        <tr>
+          <th class="c-match text-left px-2.5 py-2.5 text-slate-500 font-semibold tracking-wide border-r"
+              style="border-color:var(--border);">Partido</th>
+          <th class="c-result text-center px-2 py-2.5 text-slate-500 font-semibold border-r"
+              style="border-color:var(--border);">Real</th>
+          <% participantScores.forEach(p => { %>
+            <th class="text-center px-3 py-2 text-slate-300 font-semibold whitespace-nowrap" style="min-width:78px;">
+              <div><%= p.name %></div>
+              <div class="text-slate-600 font-normal text-[10px] mono mt-0.5"><%= p.totalPoints %> pts</div>
+            </th>
+          <% }); %>
+        </tr>
+      </thead>
+
+      <tbody>
+        <%
+          let currentDateKey = null;
+          matchData.forEach(match => {
+            const h = match.homeTeamData;
+            const a = match.awayTeamData;
+            const hasResult = match.homeScore !== null;
+            const grad = `linear-gradient(to bottom, rgba(${h.rgb},0.22) 0%, transparent 45%, transparent 55%, rgba(${a.rgb},0.22) 100%)`;
+        %>
+
+          <% if (match.dateKey !== currentDateKey) { currentDateKey = match.dateKey; %>
+            <tr class="date-sep">
+              <td colspan="<%= participantScores.length + 2 %>">
+                <%= match.dateKey.charAt(0).toUpperCase() + match.dateKey.slice(1) %>
+              </td>
+            </tr>
+          <% } %>
+
+          <tr style="border-top:1px solid rgba(255,255,255,0.025);" class="hover:bg-white/[.015] transition-colors">
+
+            <td class="c-match border-r" style="border-color:var(--border); background-image:<%= grad %>;">
+              <div class="match-inner">
+                <div class="team-row mb-1">
+                  <div class="team-bar" style="background:rgba(<%= h.rgb %>,0.75);"></div>
+                  <img class="team-flag" src="https://flagcdn.com/w40/<%= h.code %>.png" alt="<%= match.homeTeam %>" loading="lazy">
+                  <span class="team-name"><%= match.homeTeam %></span>
+                </div>
+                <div class="team-row">
+                  <div class="team-bar" style="background:rgba(<%= a.rgb %>,0.75);"></div>
+                  <img class="team-flag" src="https://flagcdn.com/w40/<%= a.code %>.png" alt="<%= match.awayTeam %>" loading="lazy">
+                  <span class="team-name"><%= match.awayTeam %></span>
+                </div>
+                <div class="match-meta">
+                  <span class="match-num">#<%= match.matchNumber %></span>
+                  <span class="match-time"><%= match.timeStr %> h</span>
+                </div>
+              </div>
+            </td>
+
+            <td class="c-result text-center px-2 py-3 border-r" style="border-color:var(--border);">
+              <% if (hasResult) { %>
+                <span class="mono font-semibold text-white text-sm tracking-wider"><%= match.homeScore %>–<%= match.awayScore %></span>
+              <% } else { %>
+                <span style="color:var(--muted);">–</span>
+              <% } %>
+            </td>
+
+            <% participantScores.forEach(p => {
+              const pred = match.predictionsMap[p.id];
+              let cellClass = '', scoreColor = 'color:#3d5060;', ptsStr = '';
+              if (pred && hasResult) {
+                if      (pred.points === 3) { cellClass='cell-exact';    scoreColor='color:#4ade80;'; ptsStr='+3'; }
+                else if (pred.points === 1) { cellClass='cell-tendency'; scoreColor='color:#fbbf24;'; ptsStr='+1'; }
+                else                        { cellClass='';              scoreColor='color:#3d5060;'; ptsStr='0';  }
+              } else if (pred && !hasResult) {
+                scoreColor = 'color:rgba(255,255,255,0.5);';
+              }
+            %>
+              <td class="px-2 py-3 text-center <%= cellClass %>" style="border-left:1px solid rgba(255,255,255,0.025);">
+                <% if (pred) { %>
+                  <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+                    <span class="mono font-semibold text-xs" style="<%= scoreColor %>"><%= pred.homeScore %>–<%= pred.awayScore %></span>
+                    <% if (hasResult) { %>
+                      <span class="mono text-[9px]" style="<%= scoreColor %>;opacity:.6;"><%= ptsStr %></span>
+                    <% } %>
+                  </div>
+                <% } else { %>
+                  <span style="color:#1e2d3d;">—</span>
+                <% } %>
+              </td>
+            <% }); %>
+
+          </tr>
+
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+</body>
+</html>
