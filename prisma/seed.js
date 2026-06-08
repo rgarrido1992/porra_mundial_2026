@@ -174,6 +174,13 @@ const predData = [
 ];
 
 async function main() {
+  // Si ya hay datos en producción, no borrar nada (preserva resultados introducidos por el admin)
+  const existing = await prisma.participant.count();
+  if (existing > 0) {
+    console.log(`✅ BD ya inicializada (${existing} participantes). Saltando seed.`);
+    return;
+  }
+
   console.log('🌍 Sembrando Porra Mundial 2026 (datos reales)...');
 
   await prisma.prediction.deleteMany();
