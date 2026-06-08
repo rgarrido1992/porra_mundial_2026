@@ -8,14 +8,14 @@ function d(fecha, hora) {
 
 const matchDefs = [
   // ── JORNADA 1 ──────────────────────────────────────────────────────────────
-  { matchNumber:  1, homeTeam: 'México',               awayTeam: 'Sudáfrica',            matchDate: d('11/06/2026','21:00'), stage:'group', group:'A', homeScore:2,    awayScore:0    },
-  { matchNumber:  2, homeTeam: 'Corea del Sur',        awayTeam: 'Rep. Checa',           matchDate: d('12/06/2026','04:00'), stage:'group', group:'A', homeScore:1,    awayScore:1    },
-  { matchNumber:  3, homeTeam: 'Canadá',               awayTeam: 'Bosnia y Herzegovina', matchDate: d('12/06/2026','21:00'), stage:'group', group:'B', homeScore:3,    awayScore:1    },
-  { matchNumber:  4, homeTeam: 'Estados Unidos',       awayTeam: 'Paraguay',             matchDate: d('13/06/2026','03:00'), stage:'group', group:'C', homeScore:2,    awayScore:0    },
-  { matchNumber:  5, homeTeam: 'Catar',                awayTeam: 'Suiza',                matchDate: d('13/06/2026','21:00'), stage:'group', group:'B', homeScore:0,    awayScore:2    },
-  { matchNumber:  6, homeTeam: 'Brasil',               awayTeam: 'Marruecos',            matchDate: d('14/06/2026','00:00'), stage:'group', group:'D', homeScore:1,    awayScore:0    },
-  { matchNumber:  7, homeTeam: 'Haití',                awayTeam: 'Escocia',              matchDate: d('14/06/2026','03:00'), stage:'group', group:'D', homeScore:0,    awayScore:2    },
-  { matchNumber:  8, homeTeam: 'Australia',            awayTeam: 'Turquía',              matchDate: d('14/06/2026','06:00'), stage:'group', group:'C', homeScore:1,    awayScore:1    },
+  { matchNumber:  1, homeTeam: 'México',               awayTeam: 'Sudáfrica',            matchDate: d('11/06/2026','21:00'), stage:'group', group:'A', homeScore:null, awayScore:null },
+  { matchNumber:  2, homeTeam: 'Corea del Sur',        awayTeam: 'Rep. Checa',           matchDate: d('12/06/2026','04:00'), stage:'group', group:'A', homeScore:null, awayScore:null },
+  { matchNumber:  3, homeTeam: 'Canadá',               awayTeam: 'Bosnia y Herzegovina', matchDate: d('12/06/2026','21:00'), stage:'group', group:'B', homeScore:null, awayScore:null },
+  { matchNumber:  4, homeTeam: 'Estados Unidos',       awayTeam: 'Paraguay',             matchDate: d('13/06/2026','03:00'), stage:'group', group:'C', homeScore:null, awayScore:null },
+  { matchNumber:  5, homeTeam: 'Catar',                awayTeam: 'Suiza',                matchDate: d('13/06/2026','21:00'), stage:'group', group:'B', homeScore:null, awayScore:null },
+  { matchNumber:  6, homeTeam: 'Brasil',               awayTeam: 'Marruecos',            matchDate: d('14/06/2026','00:00'), stage:'group', group:'D', homeScore:null, awayScore:null },
+  { matchNumber:  7, homeTeam: 'Haití',                awayTeam: 'Escocia',              matchDate: d('14/06/2026','03:00'), stage:'group', group:'D', homeScore:null, awayScore:null },
+  { matchNumber:  8, homeTeam: 'Australia',            awayTeam: 'Turquía',              matchDate: d('14/06/2026','06:00'), stage:'group', group:'C', homeScore:null, awayScore:null },
   { matchNumber:  9, homeTeam: 'Alemania',             awayTeam: 'Curazao',              matchDate: d('14/06/2026','19:00'), stage:'group', group:'E', homeScore:null, awayScore:null },
   { matchNumber: 10, homeTeam: 'Países Bajos',         awayTeam: 'Japón',                matchDate: d('14/06/2026','22:00'), stage:'group', group:'F', homeScore:null, awayScore:null },
   { matchNumber: 11, homeTeam: 'Costa de Marfil',      awayTeam: 'Ecuador',              matchDate: d('15/06/2026','01:00'), stage:'group', group:'E', homeScore:null, awayScore:null },
@@ -95,6 +95,7 @@ const matchDefs = [
 const participantNames = [
   'Ricardo G.', 'Guillermo H.', 'Raúl L.', 'Iván G.', 'Raúl P.',
   'Christian M.', 'Carlos P.', 'P. Eugenio M.', 'Mike C.', 'Adrián L.', 'Manu L.',
+  'Adrián G.', 'Fran T.', 'Paco L.', 'Alberto S.', 'Dani S.', 'Jacobo E.', 'Julián',
 ];
 
 // predData[matchIdx][participantIdx] = [homeScore, awayScore] | null
@@ -174,11 +175,14 @@ const predData = [
 ];
 
 async function main() {
-  // Si ya hay datos en producción, no borrar nada (preserva resultados introducidos por el admin)
+  // FORCE_RESEED=true en Railway para forzar un re-seed puntual; luego quitar la variable
   const existing = await prisma.participant.count();
-  if (existing > 0) {
+  if (existing > 0 && process.env.FORCE_RESEED !== 'true') {
     console.log(`✅ BD ya inicializada (${existing} participantes). Saltando seed.`);
     return;
+  }
+  if (process.env.FORCE_RESEED === 'true') {
+    console.log('⚠️  FORCE_RESEED activo — re-sembrando desde cero...');
   }
 
   console.log('🌍 Sembrando Porra Mundial 2026 (datos reales)...');
@@ -204,8 +208,8 @@ async function main() {
     const participant = participants[pi];
     const rows = [];
     for (let mi = 0; mi < allMatches.length; mi++) {
-      const pred = predData[mi][pi];
-      if (pred === null) { skipped++; continue; }
+      const pred = predData[mi]?.[pi];
+      if (pred == null) { skipped++; continue; }
       rows.push({
         participantId: participant.id,
         matchId:       allMatches[mi].id,
