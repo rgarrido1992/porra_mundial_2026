@@ -17,6 +17,8 @@ model Match {
   matchDate   DateTime
   stage       String       // "group", "round_of_16", "quarter", "semi", "third_place", "final"
   group       String?      // "A".."L" para fase de grupos, null en eliminatorias
+  status      String       @default("scheduled") // scheduled | live | halftime | finished
+  minute      Int?         // minuto actual si status=live
   predictions Prediction[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt

@@ -18,12 +18,14 @@ app.use(session({
   cookie: { httpOnly: true, maxAge: 8 * 60 * 60 * 1000 }, // 8 h
 }));
 
-const indexRouter = require('./src/routes/index');
-const adminRouter = require('./src/routes/admin');
+const indexRouter  = require('./src/routes/index');
+const adminRouter  = require('./src/routes/admin');
+const { startPolling } = require('./src/services/liveScores');
 app.use('/', indexRouter);
 app.use('/admin', adminRouter);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`\n⚽  Porra Mundial 2026 corriendo en http://localhost:${PORT}\n`);
+  startPolling();
 });

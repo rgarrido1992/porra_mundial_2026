@@ -50,6 +50,7 @@ async function loadData(stageFilter = 'group') {
     matches.forEach(match => {
       const pred = match.predictions.find(pr => pr.participantId === p.id);
       if (!pred) return;
+      if (match.status !== 'finished') return;
       const pts = calcPoints(pred.homeScore, pred.awayScore, match.homeScore, match.awayScore);
       if (pts !== null) {
         playedCount++;
@@ -66,16 +67,22 @@ async function loadData(stageFilter = 'group') {
   participantScores.forEach((p, i) => { p.position = i + 1; });
 
   const matchData = matches.map(match => {
+    const isLive     = match.status === 'live' || match.status === 'halftime';
+    const isFinished = match.status === 'finished';
     const predictionsMap = {};
     match.predictions.forEach(pred => {
       predictionsMap[pred.participantId] = {
         homeScore: pred.homeScore,
         awayScore: pred.awayScore,
-        points: calcPoints(pred.homeScore, pred.awayScore, match.homeScore, match.awayScore),
+        points: isFinished
+          ? calcPoints(pred.homeScore, pred.awayScore, match.homeScore, match.awayScore)
+          : null,
       };
     });
     return {
       ...match,
+      isLive,
+      isFinished,
       predictionsMap,
       timeStr:      matchTime(match.matchDate),
       dateKey:      dayKey(match.matchDate),
@@ -84,10 +91,11 @@ async function loadData(stageFilter = 'group') {
     };
   });
 
-  const playedMatches = matches.filter(m => m.homeScore !== null).length;
+  const playedMatches = matches.filter(m => m.status === 'finished').length;
+  const liveCount     = matches.filter(m => m.status === 'live' || m.status === 'halftime').length;
   const totalMatches  = matches.length;
 
-  return { participantScores, matchData, playedMatches, totalMatches };
+  return { participantScores, matchData, playedMatches, liveCount, totalMatches };
 }
 
 // ── RUTAS ─────────────────────────────────────────────────────────────────────
@@ -106,8 +114,8 @@ router.get('/fase-grupos', async (req, res) => {
 
 router.get('/clasificacion', async (req, res) => {
   try {
-    const { participantScores, playedMatches, totalMatches } = await loadData();
-    res.render('clasificacion', { participantScores, playedMatches, totalMatches });
+    const { participantScores, playedMatches, totalMatches, liveCount } = await loadData();
+    res.render('clasificacion', { participantScores, playedMatches, totalMatches, liveCount });
   } catch (err) {
     console.error(err);
     res.status(500).send(`<pre>${err.message}</pre>`);

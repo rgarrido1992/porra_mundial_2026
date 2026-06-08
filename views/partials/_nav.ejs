@@ -33,10 +33,21 @@
         <span class="text-sm font-bold text-white tracking-widest uppercase hidden sm:block">Porra World Cup 2026</span>
         <span class="text-sm font-bold text-white tracking-widest uppercase sm:hidden">Porra WC 2026</span>
       </div>
-      <div class="flex items-center gap-1.5 text-xs text-slate-500">
-        <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-        <span class="mono"><%= playedMatches %>/<%= totalMatches %></span>
-        <span class="hidden sm:inline">jugados</span>
+      <div class="flex items-center gap-2">
+        <% if (typeof liveCount !== 'undefined' && liveCount > 0) { %>
+          <span class="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#f87171;">
+            <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+            LIVE
+          </span>
+        <% } %>
+        <div class="flex items-center gap-1.5 text-xs text-slate-500">
+          <% if (!liveCount) { %>
+            <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+          <% } %>
+          <span class="mono"><%= playedMatches %>/<%= totalMatches %></span>
+          <span class="hidden sm:inline">jugados</span>
+        </div>
       </div>
     </div>
 

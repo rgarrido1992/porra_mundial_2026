@@ -1,7 +1,7 @@
 <%- include('partials/_nav', {
   pageTitle:    'Clasificación',
   activePage:   'clasificacion',
-  playedMatches, totalMatches,
+  playedMatches, totalMatches, liveCount,
   extraCss: `
     .rank-row { border-top:1px solid rgba(255,255,255,0.04); transition:background .1s; }
     .rank-row:hover { background:rgba(255,255,255,0.018); }
@@ -76,6 +76,10 @@
   </p>
 
 </main>
+
+<% if (liveCount > 0) { %>
+<script>setTimeout(() => location.reload(), 30000);</script>
+<% } %>
 
 </body>
 </html>

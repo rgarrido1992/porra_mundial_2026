@@ -1,7 +1,7 @@
 <%- include('partials/_nav', {
   pageTitle:    'Fase de Grupos',
   activePage:   'fase-grupos',
-  playedMatches, totalMatches,
+  playedMatches, totalMatches, liveCount,
   extraCss: `
     .table-wrap { overflow:auto; max-height:calc(100vh - 120px); border:1px solid var(--border); border-radius:0.75rem; }
     .grid-table { border-collapse:separate; border-spacing:0; min-width:100%; }
@@ -106,8 +106,16 @@
             </td>
 
             <td class="c-result text-center px-2 py-3 border-r" style="border-color:var(--border);">
-              <% if (hasResult) { %>
+              <% if (match.isLive || match.isFinished) { %>
                 <span class="mono font-semibold text-white text-sm tracking-wider"><%= match.homeScore %>–<%= match.awayScore %></span>
+                <% if (match.isLive) { %>
+                  <div class="flex items-center justify-center gap-1 mt-0.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0"></span>
+                    <span class="mono text-[9px] font-bold text-red-400 uppercase">
+                      <%= match.status === 'halftime' ? 'HT' : (match.minute ? match.minute + "'" : 'LIVE') %>
+                    </span>
+                  </div>
+                <% } %>
               <% } else { %>
                 <span style="color:var(--muted);">–</span>
               <% } %>
@@ -116,11 +124,13 @@
             <% participantScores.forEach(p => {
               const pred = match.predictionsMap[p.id];
               let cellClass = '', scoreColor = 'color:#3d5060;', ptsStr = '';
-              if (pred && hasResult) {
+              if (pred && match.isFinished) {
                 if      (pred.points === 3) { cellClass='cell-exact';    scoreColor='color:#4ade80;'; ptsStr='+3'; }
                 else if (pred.points === 1) { cellClass='cell-tendency'; scoreColor='color:#fbbf24;'; ptsStr='+1'; }
                 else                        { cellClass='';              scoreColor='color:#3d5060;'; ptsStr='0';  }
-              } else if (pred && !hasResult) {
+              } else if (pred && (match.isLive)) {
+                scoreColor = 'color:rgba(255,160,160,0.7);'; // tinte rojo suave durante el partido
+              } else if (pred) {
                 scoreColor = 'color:rgba(255,255,255,0.5);';
               }
             %>
@@ -146,6 +156,10 @@
   </div>
 
 </main>
+
+<% if (liveCount > 0) { %>
+<script>setTimeout(() => location.reload(), 30000);</script>
+<% } %>
 
 </body>
 </html>
