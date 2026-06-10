@@ -1,8 +1,7 @@
 /**
  * Lee instrucciones/DATOS PORRA.MD y actualiza las predicciones en la BD.
- * Formato del archivo: tab-separated values con pares de líneas (home score, away score)
- * Participa
-ntes sin pronósticos completos no tendrán predicciones.
+ * Línea 1: participantes separados por `;`
+ * Líneas 2+: pares de líneas (home score, away score) separados por tabulación
  * Uso: node prisma/updateFromDataFile.js
  */
 require('dotenv').config();
@@ -15,10 +14,10 @@ const dataFile = path.join(__dirname, '..', 'instrucciones', 'DATOS PORRA.MD');
 
 async function main() {
   const content = fs.readFileSync(dataFile, 'utf-8');
-  const lines = content.split('\n').map(l => l.trim());
+  const lines = content.split('\n');
 
-  // Línea 1: nombres de participantes (tab-separated)
-  const headers = lines[0].split('\t').map(h => h.trim());
+  // Línea 1: nombres de participantes (separados por ;)
+  const headers = lines[0].split(';').map(h => h.trim());
   console.log(`📄 Leyendo ${headers.length} participantes del archivo...`);
 
   // Cargar todos los partidos en orden
@@ -44,7 +43,7 @@ async function main() {
     lineIdx += 2;
 
     // Saltamos línea en blanco si existe
-    if (lineIdx < lines.length && lines[lineIdx] === '') {
+    if (lineIdx < lines.length && lines[lineIdx].trim() === '') {
       lineIdx++;
     }
 
@@ -63,7 +62,7 @@ async function main() {
       const awayScore = parseInt(awayScores[pi], 10);
 
       if (isNaN(homeScore) || isNaN(awayScore)) {
-        console.warn(`⚠️  Predicción inválida en partido ${matchNumber}, participante ${participant}: ${homeScores[pi]}-${awayScores[pi]}`);
+        console.warn(`⚠️  Predicción inválida en partido ${matchNumber}, participante ${participant}: ${homeScores[pi]} vs ${awayScores[pi]}`);
         continue;
       }
 
