@@ -101,7 +101,10 @@ async function loadData(stageFilter = 'group') {
   const liveCount     = matches.filter(m => m.status === 'live' || m.status === 'halftime').length;
   const totalMatches  = matches.length;
 
-  return { participantScores, matchData, playedMatches, liveCount, totalMatches };
+  // Próximo partido no jugado
+  const nextMatch = matches.find(m => m.status !== 'finished');
+
+  return { participantScores, matchData, playedMatches, liveCount, totalMatches, nextMatch };
 }
 
 // ── RUTAS ─────────────────────────────────────────────────────────────────────

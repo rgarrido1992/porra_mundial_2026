@@ -32,7 +32,30 @@
              alt="FIFA World Cup 2026" class="h-8 w-auto shrink-0" style="object-fit:contain;">
         <span class="text-sm font-bold text-white tracking-widest uppercase">Porra World Cup 2026</span>
       </div>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-3">
+        <% if (typeof nextMatch !== 'undefined' && nextMatch && nextMatch.status === 'scheduled') { %>
+          <div class="flex items-center gap-1.5 text-xs text-blue-400 font-mono">
+            <span>Próximo: <span id="countdown">--h --m --s</span></span>
+          </div>
+          <script>
+            const nextDate = new Date('<%= nextMatch.matchDate.toISOString() %>');
+            function updateCountdown() {
+              const now = new Date();
+              const diff = nextDate - now;
+              if (diff <= 0) {
+                document.getElementById('countdown').textContent = '¡YA!';
+                return;
+              }
+              const h = Math.floor(diff / 3600000);
+              const m = Math.floor((diff % 3600000) / 60000);
+              const s = Math.floor((diff % 60000) / 1000);
+              document.getElementById('countdown').textContent =
+                `${h}h ${m}m ${s}s`;
+            }
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+          </script>
+        <% } %>
         <% if (typeof liveCount !== 'undefined' && liveCount > 0) { %>
           <span class="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider"
                 style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#f87171;">
