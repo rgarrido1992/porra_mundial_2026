@@ -87,15 +87,12 @@ const matchDefs = [
 ];
 
 // ──────────────────────────────────────────────────────────────────────────────
-// PARTICIPANTES REALES
-// Índices: 0=Ricardo G. 1=Guillermo H. 2=Raúl L. 3=Iván G. 4=Raúl P.
-//          5=Christian M. 6=Carlos P. 7=P. Eugenio M. 8=Mike C. 9=Adrián L. 10=Manu L.
-// Carlos P. (índice 6) sin pronóstico desde el partido 8 en adelante → null
+// PARTICIPANTES REALES (19 total, en MAYÚSCULAS)
 // ──────────────────────────────────────────────────────────────────────────────
 const participantNames = [
-  'Ricardo G.', 'Guillermo H.', 'Raúl L.', 'Iván G.', 'Raúl P.',
-  'Christian M.', 'Carlos P.', 'P. Eugenio M.', 'Mike C.', 'Adrián L.', 'Manu L.',
-  'Adrián G.', 'Fran T.', 'Paco L.', 'Alberto S.', 'Dani S.', 'Jacobo E.', 'Julián',
+  'RICARDO G.', 'GUILLERMO H.', 'RAÚL L.', 'IVÁN G.', 'RAÚL P.',
+  'CHRISTIAN M.', 'CARLOS P.', 'P. EUGENIO M.', 'MIKE C.', 'ADRIÁN L.', 'MANU L.',
+  'ADRIÁN G.', 'FRAN T.', 'PACO L.', 'ALBERTO S.', 'DANI L.', 'JACOBO E.', 'JULIAN', 'ALEX D.',
 ];
 
 // predData[matchIdx][participantIdx] = [homeScore, awayScore] | null
