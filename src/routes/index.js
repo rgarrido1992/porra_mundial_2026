@@ -36,7 +36,7 @@ function matchTime(date) {
 }
 
 async function loadData(stageFilter = 'group') {
-  const [participants, matches] = await Promise.all([
+  const [allParticipants, matches] = await Promise.all([
     prisma.participant.findMany({ orderBy: { id: 'asc' } }),
     prisma.match.findMany({
       where:   { stage: stageFilter },
@@ -44,6 +44,12 @@ async function loadData(stageFilter = 'group') {
       orderBy: { matchDate: 'asc' },
     }),
   ]);
+
+  // Filtrar solo participantes que tengan al menos 1 predicción
+  const participantsWithPreds = new Set(
+    matches.flatMap(m => m.predictions.map(p => p.participantId))
+  );
+  const participants = allParticipants.filter(p => participantsWithPreds.has(p.id));
 
   const participantScores = participants.map(p => {
     let totalPoints = 0, exactCount = 0, tendencyCount = 0, zeroCount = 0, playedCount = 0;
