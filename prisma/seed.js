@@ -87,12 +87,13 @@ const matchDefs = [
 ];
 
 // ──────────────────────────────────────────────────────────────────────────────
-// PARTICIPANTES REALES (20 total, en MAYÚSCULAS)
+// PARTICIPANTES REALES (25 total, en MAYÚSCULAS)
 // ──────────────────────────────────────────────────────────────────────────────
 const participantNames = [
   'RICARDO G.', 'GUILLERMO H.', 'RAÚL L.', 'IVÁN G.', 'RAÚL P.',
   'CHRISTIAN M.', 'CARLOS P.', 'P. EUGENIO M.', 'MIKE C.', 'ADRIÁN L.', 'MANU L.',
-  'ADRIÁN G.', 'FRAN T.', 'PACO L.', 'ALBERTO S.', 'DANI L.', 'JACOBO E.', 'JULIAN', 'ALEX D.', 'NOÉ R.',
+  'ADRIÁN G.', 'FRAN T.', 'PACO L.', 'ALBERTO S.', 'DANI L.', 'JACOBO E.', 'JULIAN',
+  'ALEX D.', 'NOÉ R.', 'DIEGO K.', 'JOSE GABRIEL V.', 'JORGE P', 'GONZALO', 'MANUEL G',
 ];
 
 // predData[matchIdx][participantIdx] = [homeScore, awayScore] | null
