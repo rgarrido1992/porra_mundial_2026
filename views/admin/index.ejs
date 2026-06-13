@@ -32,6 +32,30 @@
       flex: 1;
     }
     input[type="text"]:focus { outline: none; border-color: rgba(34,197,94,0.5); }
+    select {
+      background: #0b0f14;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #e2e8f0;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+    }
+    select:focus { outline: none; border-color: rgba(34,197,94,0.5); }
+    select option { background: #0b0f14; color: #e2e8f0; }
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .status-scheduled { background: rgba(100,116,139,0.2); color: #cbd5e1; }
+    .status-live { background: rgba(239,68,68,0.2); color: #f87171; }
+    .status-halftime { background: rgba(168,85,247,0.2); color: #d8b4fe; }
+    .status-finished { background: rgba(34,197,94,0.2); color: #86efac; }
     .btn {
       background: #1a2a1a;
       border: 1px solid rgba(34,197,94,0.2);
@@ -155,29 +179,42 @@
         <% } %>
 
         <div class="row-match <%= hasResult ? 'has-result' : '' %> px-5 py-2.5" id="match-<%= match.id %>">
-          <form method="POST" action="/admin/match/<%= match.id %>/result"
-                class="flex items-center gap-3 flex-wrap">
+          <div class="flex items-center gap-3 flex-wrap">
 
-            <span class="mono text-[10px] text-slate-600 w-8 shrink-0">#<%= match.matchNumber %></span>
+            <!-- RESULTADOS -->
+            <form method="POST" action="/admin/match/<%= match.id %>/result"
+                  class="flex items-center gap-3 flex-1">
+              <span class="mono text-[10px] text-slate-600 w-8 shrink-0">#<%= match.matchNumber %></span>
+              <div class="flex items-center gap-1.5 flex-1 min-w-0">
+                <span class="text-sm text-slate-300 truncate" style="min-width:100px;max-width:140px;">
+                  <%= match.homeTeam %>
+                </span>
+                <input type="number" name="homeScore" min="0" max="99"
+                       value="<%= hasResult ? match.homeScore : '' %>"
+                       placeholder="–">
+                <span class="text-slate-600 font-bold mono">–</span>
+                <input type="number" name="awayScore" min="0" max="99"
+                       value="<%= hasResult ? match.awayScore : '' %>"
+                       placeholder="–">
+                <span class="text-sm text-slate-300 truncate" style="min-width:100px;max-width:140px;">
+                  <%= match.awayTeam %>
+                </span>
+              </div>
+              <button type="submit" class="btn shrink-0">Guardar resultado</button>
+            </form>
 
-            <div class="flex items-center gap-1.5 flex-1 min-w-0">
-              <span class="text-sm text-slate-300 truncate" style="min-width:100px;max-width:140px;">
-                <%= match.homeTeam %>
-              </span>
-              <input type="number" name="homeScore" min="0" max="99"
-                     value="<%= hasResult ? match.homeScore : '' %>"
-                     placeholder="–">
-              <span class="text-slate-600 font-bold mono">–</span>
-              <input type="number" name="awayScore" min="0" max="99"
-                     value="<%= hasResult ? match.awayScore : '' %>"
-                     placeholder="–">
-              <span class="text-sm text-slate-300 truncate" style="min-width:100px;max-width:140px;">
-                <%= match.awayTeam %>
-              </span>
-            </div>
+            <!-- STATUS -->
+            <form method="POST" action="/admin/match/<%= match.id %>/status"
+                  class="flex items-center gap-2">
+              <select name="status" onchange="this.form.submit();">
+                <option value="scheduled" <%= match.status === 'scheduled' ? 'selected' : '' %>>Programado</option>
+                <option value="live" <%= match.status === 'live' ? 'selected' : '' %>>En directo</option>
+                <option value="halftime" <%= match.status === 'halftime' ? 'selected' : '' %>>Descanso</option>
+                <option value="finished" <%= match.status === 'finished' ? 'selected' : '' %>>Finalizado</option>
+              </select>
+            </form>
 
-            <button type="submit" class="btn shrink-0">Guardar</button>
-          </form>
+          </div>
         </div>
 
       <% }); %>

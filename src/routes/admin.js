@@ -49,6 +49,20 @@ router.post('/match/:id/result', requireAuth, async (req, res) => {
   res.redirect('/admin?saved=resultados');
 });
 
+// ── STATUS DEL PARTIDO ─────────────────────────────────────────────────────────
+router.post('/match/:id/status', requireAuth, async (req, res) => {
+  const matchId = parseInt(req.params.id, 10);
+  const { status } = req.body;
+  if (!['scheduled', 'live', 'halftime', 'finished'].includes(status)) {
+    return res.redirect('/admin?error=status-invalido');
+  }
+  await prisma.match.update({
+    where: { id: matchId },
+    data: { status },
+  });
+  res.redirect('/admin?saved=status');
+});
+
 // ── PARTICIPANTES ─────────────────────────────────────────────────────────────
 router.post('/participant/add', requireAuth, async (req, res) => {
   const name = (req.body.name || '').trim();
