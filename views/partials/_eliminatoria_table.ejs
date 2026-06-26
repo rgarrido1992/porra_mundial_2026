@@ -1,0 +1,116 @@
+<!-- ═════════════════════════════════════════════════════════════════════════════ -->
+<!-- TABLA REUTILIZABLE PARA ELIMINATORIAS -->
+<!-- ═════════════════════════════════════════════════════════════════════════════ -->
+
+<% if (matchData && matchData.length > 0) { %>
+
+  <!-- Título -->
+  <div class="text-center mb-3 mt-8">
+    <h2 style="font-size: 16px; font-weight: 700; color: white; letter-spacing: 0.25em; text-transform: uppercase;"><%= title %></h2>
+  </div>
+
+  <!-- Tabla -->
+  <div class="flex items-center justify-between mb-2">
+    <p class="text-[10px] font-bold uppercase tracking-[.12em] text-slate-600">Matriz de Predicciones</p>
+    <span class="text-[10px] text-slate-700"><%= totalMatches %> partidos · <%= participantScores.length %> participantes</span>
+  </div>
+
+  <div class="table-wrap">
+    <table class="grid-table text-xs">
+
+      <thead>
+        <tr>
+          <th class="c-match text-left px-2.5 py-2.5 text-slate-500 font-semibold tracking-wide border-r"
+              style="border-color:var(--border);">Partido</th>
+          <th class="c-result text-center px-2 py-2.5 text-slate-500 font-semibold border-r"
+              style="border-color:var(--border);">Real</th>
+          <% participantScores.forEach(p => { %>
+            <th class="text-center px-3 py-2 text-slate-300 font-semibold whitespace-nowrap" style="min-width:78px;">
+              <div><%= p.name %></div>
+              <div class="text-slate-600 font-normal text-[10px] mono mt-0.5"><%= p.totalPoints %> pts</div>
+            </th>
+          <% }); %>
+        </tr>
+      </thead>
+
+      <tbody>
+        <%
+          let currentDateKey = null;
+          matchData.forEach(match => {
+            const h = match.homeTeamData;
+            const a = match.awayTeamData;
+            const hasResult = match.homeScore !== null;
+            const grad = `linear-gradient(to bottom, rgba(${h.rgb},0.22) 0%, transparent 45%, transparent 55%, rgba(${a.rgb},0.22) 100%)`;
+        %>
+
+          <% if (match.dateKey !== currentDateKey) { currentDateKey = match.dateKey; %>
+            <tr class="date-sep">
+              <td colspan="<%= participantScores.length + 2 %>">
+                <%= match.dateKey ? match.dateKey.charAt(0).toUpperCase() + match.dateKey.slice(1) : 'Sin fecha' %>
+              </td>
+            </tr>
+          <% } %>
+
+          <tr style="border-top:1px solid rgba(255,255,255,0.025);" class="hover:bg-white/[.015] transition-colors">
+
+            <td class="c-match border-r" style="border-color:var(--border); background-image:<%= grad %>;">
+              <div class="match-inner">
+                <div class="team-row mb-1">
+                  <div class="team-bar" style="background:rgba(<%= h.rgb %>,0.75);"></div>
+                  <img class="team-flag" src="https://flagcdn.com/w40/<%= h.code %>.png" alt="<%= match.homeTeam || 'TBD' %>" loading="lazy">
+                  <span class="team-name"><%= match.homeTeam || '–' %></span>
+                </div>
+                <div class="team-row">
+                  <div class="team-bar" style="background:rgba(<%= a.rgb %>,0.75);"></div>
+                  <img class="team-flag" src="https://flagcdn.com/w40/<%= a.code %>.png" alt="<%= match.awayTeam || 'TBD' %>" loading="lazy">
+                  <span class="team-name"><%= match.awayTeam || '–' %></span>
+                </div>
+                <div class="match-meta">
+                  <span class="match-num">#<%= match.matchNumber %></span>
+                  <span class="match-time"><%= match.timeStr ? match.timeStr + ' h' : 'TBD' %></span>
+                </div>
+              </div>
+            </td>
+
+            <td class="c-result border-r text-center font-semibold mono text-[11px]"
+                style="border-color:var(--border); <% if(hasResult) { %>color:#4ade80;<% } else if(match.isLive) { %>color:#f87171;<% } %>">
+              <% if (match.isFinished) { %>
+                <div><%= match.homeScore %>–<%= match.awayScore %></div>
+              <% } else if (match.isLive) { %>
+                <span class="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider"
+                      style="background:rgba(239,68,68,0.2); color:#f87171; animation:pulse 1s infinite;">
+                  LIVE <%= match.minute %>'
+                </span>
+              <% } else { %>
+                <span style="color:#64748b;">–</span>
+              <% } %>
+            </td>
+
+            <% participantScores.forEach(p => {
+              const pred = match.predictionsMap[p.id];
+              const cellClass = pred && pred.points === 3 ? 'cell-exact' : pred && pred.points === 1 ? 'cell-tendency' : '';
+            %>
+              <td class="text-center px-2 py-2.5 text-[11px] mono <%= cellClass %>"
+                  style="min-width:78px;">
+                <% if (!pred) { %>
+                  <span style="color:#64748b;">–</span>
+                <% } else { %>
+                  <div><%= pred.homeScore %>–<%= pred.awayScore %></div>
+                  <% if (pred.points !== null) { %>
+                    <div class="mt-1" style="<% if(pred.points === 3) { %>color:#4ade80; font-weight:700;<% } else if(pred.points === 1) { %>color:#fde047;<% } else { %>color:#f87171;<% } %>">
+                      <% if(pred.points === 3) { %>✓<% } %><%= pred.points %>
+                    </div>
+                  <% } %>
+                <% } %>
+              </td>
+            <% }); %>
+
+          </tr>
+
+        <% }); %>
+      </tbody>
+
+    </table>
+  </div>
+
+<% } %>

@@ -115,4 +115,55 @@ router.post('/participant/:id/predictions', requireAuth, async (req, res) => {
   res.redirect(`/admin/participant/${participantId}/predictions?saved=1`);
 });
 
+// ── CREAR PARTIDO ─────────────────────────────────────────────────────────────
+router.get('/create-match', requireAuth, async (req, res) => {
+  const teamsData = require('../data/teams');
+  const teams = Object.keys(teamsData).sort();
+  const stages = [
+    { value: 'group', label: 'Fase de Grupos' },
+    { value: 'round_of_16', label: 'Dieciseisavos' },
+    { value: 'quarter', label: 'Octavos' },
+    { value: 'semi', label: 'Cuartos' },
+    { value: 'semifinal', label: 'Semifinal' },
+    { value: 'third_place', label: '3º y 4º puesto' },
+    { value: 'final', label: 'Final' },
+  ];
+  res.render('admin/create-match', { teams, stages, saved: req.query.saved || null });
+});
+
+router.post('/create-match', requireAuth, async (req, res) => {
+  const { homeTeam, awayTeam, stage, matchDate } = req.body;
+
+  if (!homeTeam || !awayTeam || !stage || !matchDate) {
+    return res.redirect('/admin/create-match?error=campos-requeridos');
+  }
+
+  if (homeTeam === awayTeam) {
+    return res.redirect('/admin/create-match?error=equipos-iguales');
+  }
+
+  // Obtener próximo matchNumber
+  const lastMatch = await prisma.match.findFirst({
+    orderBy: { matchNumber: 'desc' },
+  });
+  const nextMatchNumber = (lastMatch?.matchNumber || 0) + 1;
+
+  // Crear partido
+  await prisma.match.create({
+    data: {
+      matchNumber: nextMatchNumber,
+      homeTeam,
+      awayTeam,
+      stage,
+      group: stage === 'group' ? req.body.group || null : null,
+      matchDate: new Date(matchDate),
+      status: 'scheduled',
+      homeScore: null,
+      awayScore: null,
+    },
+  });
+
+  res.redirect('/admin?saved=partido-creado');
+});
+
 module.exports = router;

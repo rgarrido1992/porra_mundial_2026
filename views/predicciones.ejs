@@ -42,6 +42,16 @@
     </span>
   </div>
 
+  <!-- ═══ TABLA DIECISEISAVOS ═══════════════════════════════════════════════════════ -->
+  <%- include('./partials/_eliminatoria_table', { title: 'Dieciseisavos', matchData: eliminatorias.ro16.matchData, totalMatches: eliminatorias.ro16.totalMatches, participantScores }) %>
+
+  <!-- ═══ TABLA FASE DE GRUPOS ═════════════════════════════════════════════════════ -->
+
+  <!-- Título FASE DE GRUPOS -->
+  <div class="text-center mb-3 mt-8">
+    <h2 style="font-size: 16px; font-weight: 700; color: white; letter-spacing: 0.25em; text-transform: uppercase;">Fase de Grupos</h2>
+  </div>
+
   <!-- Tabla -->
   <div class="flex items-center justify-between mb-2">
     <p class="text-[10px] font-bold uppercase tracking-[.12em] text-slate-600">Matriz de Predicciones</p>
@@ -154,6 +164,14 @@
       </tbody>
     </table>
   </div>
+
+  <!-- ═══ TABLAS DINÁMICAS PARA ELIMINATORIAS ════════════════════════════════════ -->
+
+  <%- include('./partials/_eliminatoria_table', { title: 'Octavos', matchData: eliminatorias.quarter.matchData, totalMatches: eliminatorias.quarter.totalMatches, participantScores }) %>
+  <%- include('./partials/_eliminatoria_table', { title: 'Cuartos', matchData: eliminatorias.semi.matchData, totalMatches: eliminatorias.semi.totalMatches, participantScores }) %>
+  <%- include('./partials/_eliminatoria_table', { title: 'Semifinal', matchData: eliminatorias.semifinal.matchData, totalMatches: eliminatorias.semifinal.totalMatches, participantScores }) %>
+  <%- include('./partials/_eliminatoria_table', { title: '3º y 4º Puesto', matchData: eliminatorias.third_place.matchData, totalMatches: eliminatorias.third_place.totalMatches, participantScores }) %>
+  <%- include('./partials/_eliminatoria_table', { title: 'Final', matchData: eliminatorias.final.matchData, totalMatches: eliminatorias.final.totalMatches, participantScores }) %>
 
 </main>
 

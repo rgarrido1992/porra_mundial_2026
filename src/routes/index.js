@@ -35,39 +35,81 @@ function matchTime(date) {
   });
 }
 
+// Calcular puntos ACUMULATIVOS de TODAS las fases
+async function getTotalPointsByParticipant(participantId) {
+  const stages = ['group', 'round_of_16', 'quarter', 'semi', 'third_place', 'final'];
+  let totalPoints = 0;
+
+  for (const stage of stages) {
+    const matches = await prisma.match.findMany({
+      where: { stage },
+      include: { predictions: true },
+    });
+
+    matches.forEach(match => {
+      if (match.status !== 'finished') return;
+      const pred = match.predictions.find(p => p.participantId === participantId);
+      if (!pred) return;
+      const pts = calcPoints(pred.homeScore, pred.awayScore, match.homeScore, match.awayScore);
+      if (pts !== null) {
+        totalPoints += pts;
+      }
+    });
+  }
+
+  return { totalPoints };
+}
+
 async function loadData(stageFilter = 'group') {
-  const [allParticipants, matches] = await Promise.all([
+  const [allParticipants, matchesRaw] = await Promise.all([
     prisma.participant.findMany({ orderBy: { id: 'asc' } }),
     prisma.match.findMany({
       where:   { stage: stageFilter },
       include: { predictions: true },
-      orderBy: { matchDate: 'asc' },
     }),
   ]);
 
-  // Filtrar solo participantes que tengan al menos 1 predicción
-  const participantsWithPreds = new Set(
-    matches.flatMap(m => m.predictions.map(p => p.participantId))
-  );
-  const participants = allParticipants.filter(p => participantsWithPreds.has(p.id));
-
-  const participantScores = participants.map(p => {
-    let totalPoints = 0, exactCount = 0, tendencyCount = 0, zeroCount = 0, playedCount = 0;
-    matches.forEach(match => {
-      const pred = match.predictions.find(pr => pr.participantId === p.id);
-      if (!pred) return;
-      if (match.status !== 'finished') return;
-      const pts = calcPoints(pred.homeScore, pred.awayScore, match.homeScore, match.awayScore);
-      if (pts !== null) {
-        playedCount++;
-        totalPoints += pts;
-        if (pts === 3) exactCount++;
-        else if (pts === 1) tendencyCount++;
-        else zeroCount++;
-      }
-    });
-    return { ...p, totalPoints, exactCount, tendencyCount, zeroCount, playedCount };
+  // Ordenar por fecha (NULL al final)
+  const matches = matchesRaw.sort((a, b) => {
+    if (a.matchDate === null && b.matchDate === null) return a.matchNumber - b.matchNumber;
+    if (a.matchDate === null) return 1;
+    if (b.matchDate === null) return -1;
+    return new Date(a.matchDate) - new Date(b.matchDate);
   });
+
+  // SIEMPRE devolver TODOS los participantes (no filtrar)
+  const participants = allParticipants;
+
+  const participantScores = await Promise.all(
+    participants.map(async (p) => {
+      // Puntos ACUMULATIVOS de TODAS las fases
+      const allPoints = await getTotalPointsByParticipant(p.id);
+
+      // Contar predicciones en esta fase específica
+      let stageExactCount = 0, stageTendencyCount = 0, stageZeroCount = 0, stagePlayedCount = 0;
+      matches.forEach(match => {
+        const pred = match.predictions.find(pr => pr.participantId === p.id);
+        if (!pred) return;
+        if (match.status !== 'finished') return;
+        const pts = calcPoints(pred.homeScore, pred.awayScore, match.homeScore, match.awayScore);
+        if (pts !== null) {
+          stagePlayedCount++;
+          if (pts === 3) stageExactCount++;
+          else if (pts === 1) stageTendencyCount++;
+          else stageZeroCount++;
+        }
+      });
+
+      return {
+        ...p,
+        totalPoints: allPoints.totalPoints,  // acumulativo
+        exactCount: stageExactCount,
+        tendencyCount: stageTendencyCount,
+        zeroCount: stageZeroCount,
+        playedCount: stagePlayedCount,
+      };
+    })
+  );
 
   participantScores.sort((a, b) => b.totalPoints - a.totalPoints);
   participantScores.forEach((p, i) => { p.position = i + 1; });
@@ -90,8 +132,8 @@ async function loadData(stageFilter = 'group') {
       isLive,
       isFinished,
       predictionsMap,
-      timeStr:      matchTime(match.matchDate),
-      dateKey:      dayKey(match.matchDate),
+      timeStr:      match.matchDate ? matchTime(match.matchDate) : null,
+      dateKey:      match.matchDate ? dayKey(match.matchDate) : null,
       homeTeamData: getTeam(match.homeTeam),
       awayTeamData: getTeam(match.awayTeam),
     };
@@ -113,8 +155,19 @@ router.get('/', (req, res) => res.redirect('/fase-grupos'));
 
 router.get('/fase-grupos', async (req, res) => {
   try {
-    const data = await loadData();
-    res.render('predicciones', data);
+    const groupData = await loadData('group');
+    const eliminatorias = {
+      ro16: await loadData('round_of_16'),
+      quarter: await loadData('quarter'),
+      semi: await loadData('semi'),
+      semifinal: await loadData('semifinal'),
+      third_place: await loadData('third_place'),
+      final: await loadData('final'),
+    };
+    res.render('predicciones', {
+      ...groupData,
+      eliminatorias,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).send(`<pre>${err.message}</pre>`);
