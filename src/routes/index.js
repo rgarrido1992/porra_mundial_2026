@@ -37,7 +37,7 @@ function matchTime(date) {
 
 // Calcular puntos ACUMULATIVOS de TODAS las fases
 async function getTotalPointsByParticipant(participantId) {
-  const stages = ['group', 'round_of_16', 'quarter', 'semi', 'third_place', 'final'];
+  const stages = ['group', 'round_of_16', 'quarter', 'semi', 'semifinal', 'third_place', 'final'];
   let totalPoints = 0;
 
   for (const stage of stages) {
