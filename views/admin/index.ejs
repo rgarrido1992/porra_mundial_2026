@@ -221,6 +221,15 @@
               </select>
             </form>
 
+            <!-- BORRAR -->
+            <form method="POST" action="/admin/match/<%= match.id %>/delete" class="flex items-center">
+              <button type="submit" class="btn-danger"
+                      onclick="return confirm('¿Estás seguro de que quieres borrar este partido? Se eliminarán todas las predicciones asociadas.');"
+                      title="Borrar partido">
+                🗑️
+              </button>
+            </form>
+
           </div>
         </div>
 

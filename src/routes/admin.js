@@ -115,6 +115,16 @@ router.post('/participant/:id/predictions', requireAuth, async (req, res) => {
   res.redirect(`/admin/participant/${participantId}/predictions?saved=1`);
 });
 
+// ── BORRAR PARTIDO ────────────────────────────────────────────────────────────
+router.post('/match/:id/delete', requireAuth, async (req, res) => {
+  const matchId = parseInt(req.params.id, 10);
+  await prisma.$transaction(async (tx) => {
+    await tx.prediction.deleteMany({ where: { matchId } });
+    await tx.match.delete({ where: { id: matchId } });
+  });
+  res.redirect('/admin?saved=partido-eliminado');
+});
+
 // ── CREAR PARTIDO ─────────────────────────────────────────────────────────────
 router.get('/create-match', requireAuth, async (req, res) => {
   const teamsData = require('../data/teams');
