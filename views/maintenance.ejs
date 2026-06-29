@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mantenimiento — Porra Mundial 2026</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #080c10 0%, #0e1318 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      text-align: center;
+      max-width: 500px;
+      padding: 40px;
+      background: rgba(14, 19, 24, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+    }
+
+    .logo {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 30px;
+      background: linear-gradient(135deg, #16a34a, #15803d);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+    }
+
+    h1 {
+      font-size: 32px;
+      color: #e2e8f0;
+      margin-bottom: 16px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: #cbd5e1;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .status {
+      display: inline-block;
+      background: rgba(251, 191, 36, 0.1);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      color: #fde047;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 30px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .message {
+      font-size: 14px;
+      color: #94a3b8;
+      margin-bottom: 24px;
+      line-height: 1.7;
+    }
+
+    .animation {
+      display: inline-block;
+      margin-top: 30px;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(226, 232, 240, 0.1);
+      border-top: 3px solid #16a34a;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .footer {
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .footer img {
+      height: 24px;
+      margin-top: 12px;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="logo">🔧</div>
+
+    <h1>Mantenimiento</h1>
+
+    <p class="subtitle">
+      La aplicación está en mantenimiento y será restaurada pronto.
+    </p>
+
+    <div class="status">
+      En Mantenimiento
+    </div>
+
+    <p class="message">
+      Estamos realizando actualizaciones importantes para mejorar tu experiencia.
+      Por favor, intenta acceder nuevamente en unos momentos.
+    </p>
+
+    <div class="animation">
+      <div class="spinner"></div>
+    </div>
+
+    <div class="footer">
+      <p>⚽ Porra Mundial 2026</p>
+      <p style="margin-top: 8px;">Vuelve pronto</p>
+    </div>
+  </div>
+
+</body>
+</html>

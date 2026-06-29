@@ -149,11 +149,21 @@ async function loadData(stageFilter = 'group') {
   return { participantScores, matchData, playedMatches, liveCount, totalMatches, nextMatch };
 }
 
+// Middleware para verificar mantenimiento
+const checkMaintenance = async (req, res, next) => {
+  const config = await prisma.config.findUnique({ where: { key: 'maintenance' } });
+  const maintenanceActive = config?.value === 'true' || false;
+  if (maintenanceActive) {
+    return res.render('maintenance');
+  }
+  next();
+};
+
 // ── RUTAS ─────────────────────────────────────────────────────────────────────
 
 router.get('/', (req, res) => res.redirect('/fase-grupos'));
 
-router.get('/fase-grupos', async (req, res) => {
+router.get('/fase-grupos', checkMaintenance, async (req, res) => {
   try {
     const groupData = await loadData('group');
     const eliminatorias = {

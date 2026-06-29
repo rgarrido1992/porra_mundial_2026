@@ -7,6 +7,25 @@ function requireAuth(req, res, next) {
   res.redirect('/admin/login');
 }
 
+// ── MANTENIMIENTO ─────────────────────────────────────────────────────────────
+router.post('/toggle-maintenance', requireAuth, async (req, res) => {
+  const config = await prisma.config.findUnique({ where: { key: 'maintenance' } });
+  const isActive = config?.value === 'true';
+
+  if (config) {
+    await prisma.config.update({
+      where: { key: 'maintenance' },
+      data: { value: isActive ? 'false' : 'true' },
+    });
+  } else {
+    await prisma.config.create({
+      data: { key: 'maintenance', value: 'true' },
+    });
+  }
+
+  res.redirect('/admin?saved=mantenimiento');
+});
+
 // ── LOGIN ─────────────────────────────────────────────────────────────────────
 router.get('/login', (req, res) => {
   if (req.session && req.session.isAdmin) return res.redirect('/admin');
@@ -29,11 +48,13 @@ router.post('/logout', requireAuth, (req, res) => {
 
 // ── PANEL PRINCIPAL ───────────────────────────────────────────────────────────
 router.get('/', requireAuth, async (req, res) => {
-  const [matches, participants] = await Promise.all([
+  const [matches, participants, maintenanceConfig] = await Promise.all([
     prisma.match.findMany({ orderBy: { matchNumber: 'asc' } }),
     prisma.participant.findMany({ orderBy: { name: 'asc' } }),
+    prisma.config.findUnique({ where: { key: 'maintenance' } }),
   ]);
-  res.render('admin/index', { matches, participants, saved: req.query.saved || null });
+  const maintenanceActive = maintenanceConfig?.value === 'true' || false;
+  res.render('admin/index', { matches, participants, maintenanceActive, saved: req.query.saved || null });
 });
 
 // ── RESULTADOS ────────────────────────────────────────────────────────────────
