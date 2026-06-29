@@ -125,6 +125,55 @@ router.post('/match/:id/delete', requireAuth, async (req, res) => {
   res.redirect('/admin?saved=partido-eliminado');
 });
 
+// ── EDITAR PARTIDO ────────────────────────────────────────────────────────────
+router.get('/match/:id/edit', requireAuth, async (req, res) => {
+  const matchId = parseInt(req.params.id, 10);
+  const teamsData = require('../data/teams');
+  const teams = Object.keys(teamsData).sort();
+  const stages = [
+    { value: 'group', label: 'Fase de Grupos' },
+    { value: 'round_of_16', label: 'Dieciseisavos' },
+    { value: 'quarter', label: 'Octavos' },
+    { value: 'semi', label: 'Cuartos' },
+    { value: 'semifinal', label: 'Semifinal' },
+    { value: 'third_place', label: '3º y 4º puesto' },
+    { value: 'final', label: 'Final' },
+  ];
+  const match = await prisma.match.findUnique({ where: { id: matchId } });
+  if (!match) return res.redirect('/admin');
+
+  // Convertir matchDate a formato datetime-local (YYYY-MM-DDTHH:mm)
+  const dateObj = new Date(match.matchDate);
+  const localDate = dateObj.toISOString().slice(0, 16);
+
+  res.render('admin/edit-match', { match, teams, stages, localDate, saved: req.query.saved || null });
+});
+
+router.post('/match/:id/edit', requireAuth, async (req, res) => {
+  const matchId = parseInt(req.params.id, 10);
+  const { homeTeam, awayTeam, stage, matchDate } = req.body;
+
+  if (!homeTeam || !awayTeam || !stage || !matchDate) {
+    return res.redirect(`/admin/match/${matchId}/edit?error=campos-requeridos`);
+  }
+
+  if (homeTeam === awayTeam) {
+    return res.redirect(`/admin/match/${matchId}/edit?error=equipos-iguales`);
+  }
+
+  await prisma.match.update({
+    where: { id: matchId },
+    data: {
+      homeTeam,
+      awayTeam,
+      stage,
+      matchDate: new Date(matchDate),
+    },
+  });
+
+  res.redirect('/admin?saved=partido-editado');
+});
+
 // ── CREAR PARTIDO ─────────────────────────────────────────────────────────────
 router.get('/create-match', requireAuth, async (req, res) => {
   const teamsData = require('../data/teams');
