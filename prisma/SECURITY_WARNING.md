@@ -4,7 +4,7 @@
 
 **NUNCA** intentes recrear o ejecutar:
 - `migrations/` - Contenía comandos que RESETEABAN la BD
-- `seed.js` - Contenía datos iniciales que SOBRESCRIBÍAN la BD
+- `seed.js` - **EXISTE pero está vacío/deshabilitado** (Railway lo requiere, pero debe estar inactivo)
 
 ## Por qué
 
