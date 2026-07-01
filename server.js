@@ -20,12 +20,12 @@ app.use(session({
 
 const indexRouter  = require('./src/routes/index');
 const adminRouter  = require('./src/routes/admin');
-const { startPolling } = require('./src/services/liveScores');
 app.use('/', indexRouter);
 app.use('/admin', adminRouter);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`\n⚽  Porra Mundial 2026 corriendo en http://localhost:${PORT}\n`);
-  startPolling();
+  // Polling de live scores deshabilitado: causaba sobrescritura de resultados editados manualmente
+  // Si necesitas reactivarlo: const { startPolling } = require('./src/services/liveScores'); startPolling();
 });
